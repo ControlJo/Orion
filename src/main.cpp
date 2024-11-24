@@ -22,7 +22,7 @@ double vr3;
 double faktor = 0;
 
 int CompIn; // void Ausrichtung
-int kompassabweichung;
+int AusrAnpassung;
 
 double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
 void setup()
@@ -34,8 +34,8 @@ void setup()
 void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definition siehe oben
 {
   bogenmass = (zw - Radwinkel) * 3.14159 / 180; // zw-Radwinkel gibt winkel von rad zu zielrichtung an *pi/180 ist winkel in bogenmaß
-  int RadGesch = cos(bogenmass) * zg;
-  if (Radwinkel == wr1)
+  int RadGesch = cos(bogenmass) * zg;   //berechnet die drehgeschwindigkeit
+  if (Radwinkel == wr1)   //vorzeichen setzen
   {
     if ((240 < Fahrwinkel && Fahrwinkel <= 360) || (0 <= Fahrwinkel && Fahrwinkel < 60))
     {
@@ -82,7 +82,7 @@ void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definiti
   // Serial.println(cos(bogenmass));
 }
 
-void maxgeschw()
+void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgeschwindigkeit setzen und die anderen anpassen
 {
   if (abs(vr1) >= abs(vr2) && abs(vr1) >= abs(vr3)) // rad 1 am schnellsten
   {
@@ -109,19 +109,19 @@ void maxgeschw()
   Serial.println(vr3);
 }
 
-void Ausrichtung()
+void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist
 {
   if (CompIn <= 180)
   {
-    kompassabweichung = CompIn;
+    AusrAnpassung = 50;
   }
   else
   {
-    kompassabweichung = -360 + CompIn;
+    AusrAnpassung = -50;
   }
-  vr1 = vr1 + kompassabweichung;
-  vr2 = vr2 + kompassabweichung;
-  vr3 = vr3 + kompassabweichung;
+  vr1 = vr1 + AusrAnpassung;
+  vr2 = vr2 + AusrAnpassung;
+  vr3 = vr3 + AusrAnpassung;
 }
 
 void loop() // hauptmethode
