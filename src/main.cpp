@@ -178,3 +178,39 @@ void Linie()
     zw = abs(zw - 180);
   }
 }
+
+void BallNehmen()
+  {
+    if (320 < ballrichtung && ballrichtung < 40)
+    {
+      zw = ballrichtung;
+    }
+    else if(40 < ballrichtung && ballrichtung < 80)
+    {
+      zw = 90;
+    }
+    else if(80 < ballrichtung && ballrichtung < 100)
+    {
+      zw = 135;
+    }
+    else if(100 < ballrichtung && ballrichtung < 150)
+    {
+      zw = 180;
+    }
+    else if(150 < ballrichtung && ballrichtung < 210)
+    {
+      zw = 135;
+    }
+    else if(210 < ballrichtung && ballrichtung < 260)
+    {
+      zw = 180;
+    }
+    else if(260 < ballrichtung && ballrichtung < 280)
+    {
+      zw = 225;
+    }
+    else if(280 < ballrichtung && ballrichtung < 320)
+    {
+      zw = 270;
+    }
+  }
