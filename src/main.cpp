@@ -13,7 +13,7 @@ distance/speed ratio = cos(WinkelVonRadZuBewegungsrichtung)*(strecke die ich fah
 int wr1 = -30; // winkel von rad1 zu 0°
 int wr2 = 30;
 int wr3 = 90;
-int zw = 0;   // Zielrichtung
+int zw = 0;   // Zielwinkel
 int zg = 100; // Zielgeschwindigkeit
 
 double vr1; // void maxgeschw zum fahrend der höchstegeschwindigkeit: verhältnis rad 1
@@ -25,6 +25,11 @@ int CompIn; // void Ausrichtung
 int AusrAnpassung;
 
 double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
+
+int ballrichtung;
+
+bool linie;
+
 void setup()
 {
   Serial.begin(9600); // computer usb
@@ -111,11 +116,11 @@ void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgesc
 
 void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist
 {
-  if (CompIn <= 180)
+  if (1 < CompIn && CompIn <=180)
   {
     AusrAnpassung = 50;
   }
-  else
+  else if (180 < CompIn && CompIn < 359)
   {
     AusrAnpassung = -50;
   }
@@ -154,5 +159,22 @@ void loop() // hauptmethode
       Serial.println("fertig");
       delay(10000);
     }
+  }
+}
+
+void ZuBallFahren()
+{
+  zw = ballrichtung;
+  GeschwindigkeitBerechnen(wr1, zw, zg);
+  GeschwindigkeitBerechnen(wr2, zw, zg);
+  GeschwindigkeitBerechnen(wr3, zw, zg);
+  maxgeschw();
+}
+
+void Linie()
+{
+  if(linie)
+  {
+    zw = abs(zw - 180);
   }
 }
