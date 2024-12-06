@@ -213,4 +213,8 @@ void BallNehmen()
     {
       zw = 270;
     }
+    GeschwindigkeitBerechnen(wr1, zw, zg);
+    GeschwindigkeitBerechnen(wr2, zw, zg);
+    GeschwindigkeitBerechnen(wr3, zw, zg);
+    maxgeschw();
   }
