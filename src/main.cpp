@@ -26,9 +26,10 @@ int AusrAnpassung;
 
 double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
 
-int ballrichtung;
+int ballrichtung;   //werte, die ich von der kamera bekomme
+int torrichtung;
 
-bool linie;
+bool linie;   //wert von den lichtsensoren
 
 void setup()
 {
@@ -179,7 +180,7 @@ void Linie()
   }
 }
 
-void BallNehmen()
+void BallNehmen()       //siehe Orion onion2.png 
   {
     if (320 < ballrichtung && ballrichtung < 40)
     {
@@ -197,9 +198,16 @@ void BallNehmen()
     {
       zw = 180;
     }
-    else if(150 < ballrichtung && ballrichtung < 210)
-    {
-      zw = 135;
+    else if(150 < ballrichtung && ballrichtung < 210)   //wenn der ball hinter dem Roberter ist
+    { 
+      if(0 <= torrichtung && torrichtung <= 180)
+      {
+        zw = 135;
+      }
+      if(180 < torrichtung && torrichtung <= 360)
+      {
+        zw = 225;
+      }
     }
     else if(210 < ballrichtung && ballrichtung < 260)
     {
