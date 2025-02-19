@@ -34,7 +34,8 @@ bool linie;   //wert von den lichtsensoren
 void setup()
 {
   Serial.begin(9600); // computer usb
-  Serial.println("Test");
+  Serial1.begin(9600); //pin
+  Serial.println("Teensy bereit ....");
 }
 
 void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definition siehe oben
@@ -130,39 +131,6 @@ void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist
   vr3 = vr3 + AusrAnpassung;
 }
 
-void loop() // hauptmethode
-{
-  bool maxgesch = true;
-  delay(5);
-  Serial.print("Zielwinkel:");
-  Serial.println(zw);
-  GeschwindigkeitBerechnen(wr1, zw, zg);
-  GeschwindigkeitBerechnen(wr2, zw, zg);
-  GeschwindigkeitBerechnen(wr3, zw, zg);
-  // Serial.println("Test");
-
-  if (maxgesch == true)
-  {
-    maxgeschw();
-  }
-  Ausrichtung();
-  Serial.print("Drehung: ");
-  Serial.println(vr1 + vr2 + vr3);
-
-  if (zw < 360)
-  {
-    zw = zw + 1;
-  }
-  else
-  {
-    while (true)
-    {
-      Serial.println("fertig");
-      delay(10000);
-    }
-  }
-}
-
 void ZuBallFahren()
 {
   zw = ballrichtung;
@@ -176,7 +144,14 @@ void Linie()
 {
   if(linie)
   {
-    zw = abs(zw - 180);
+    if((zw - 180) < 0)
+    {
+      zw = abs(zw - 180);
+    }
+    else
+    {
+      zw = zw - 180;
+    }
   }
 }
 
@@ -226,3 +201,46 @@ void BallNehmen()       //siehe Orion onion2.png
     GeschwindigkeitBerechnen(wr3, zw, zg);
     maxgeschw();
   }
+
+void loop() // hauptmethode
+{
+  /*
+  bool maxgesch = true;
+  delay(5);
+  Serial.print("Zielwinkel:");
+  Serial.println(zw);
+  GeschwindigkeitBerechnen(wr1, zw, zg);
+  GeschwindigkeitBerechnen(wr2, zw, zg);
+  GeschwindigkeitBerechnen(wr3, zw, zg);
+  // Serial.println("Test");
+
+  if (maxgesch == true)
+  {
+    maxgeschw();
+  }
+  Ausrichtung();
+  Serial.print("Drehung: ");
+  Serial.println(vr1 + vr2 + vr3);
+
+  if (zw < 360)
+  {
+    zw = zw + 1;
+  }
+  else
+  {
+    while (true)
+    {
+      Serial.println("fertig");
+      delay(10000);
+    }
+  }
+  */
+ if(Serial1.available())
+ {
+  String receivedData = Serial1.readStringUntil('\n');
+  Serial.print("Empfangen: ");
+  Serial.println(receivedData);
+ }
+ Serial.println("Test");
+ delay(1000);
+}
