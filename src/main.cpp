@@ -31,6 +31,8 @@ int torrichtung;
 
 bool linie;   //wert von den lichtsensoren
 
+int i = 0; //for fun
+
 void setup()
 {
   Serial.begin(9600); // computer usb
@@ -235,12 +237,59 @@ void loop() // hauptmethode
     }
   }
   */
- if(Serial1.available())
- {
+  if(Serial1.available())
+  {
   String receivedData = Serial1.readStringUntil('\n');
   Serial.print("Empfangen: ");
   Serial.println(receivedData);
- }
- Serial.println("Test");
- delay(1000);
+  }
+  
+  switch (i)
+  {
+    case 0:
+      Serial.println("Test            |");
+      i = i + 1;
+      break;
+    case 1:
+      Serial.println("Test        ____|____");
+      i = i + 1;
+      break;
+    case 2:
+      Serial.println("Test        |       |");
+      i = i + 1;
+      break;
+    case 3:
+      Serial.println("Test        | _ O _ |");
+      i = i + 1;
+      break;
+    case 4:
+      Serial.println("Test        |  [|]  |");
+      i = i + 1;
+      break;
+    case 5:
+      Serial.println("Test        |  | |  |");
+      i = i + 1;
+      break;
+    case 6:
+      Serial.println("Test        |_______|");
+      i = i + 1;
+      break;
+    case 7:
+      Serial.println("Test            |");
+      i = i + 1;
+      break;
+    case 8:
+      Serial.println("Test            |");
+      i = i + 1;
+      break;
+    case 9:
+      Serial.println("Test            |");
+      i = i + 1;
+      break;
+    case 10:
+      Serial.println("Test            |");
+      i = 0;
+      break;
+  }
+ delay(50);
 }
