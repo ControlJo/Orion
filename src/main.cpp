@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include "Kompass.h"
+#include "motor.h"
 
 /*
 Motoren festlegung:
@@ -27,7 +29,12 @@ int AusrAnpassung;
 double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
 
 int ballrichtung;   //werte, die ich von der kamera bekomme
-int torrichtung;
+int gelbtor;
+int blautor;
+bool BinGelb;
+int gegentor;
+int eigentor;
+String receivedData = "1 1 1\n";
 
 bool linie;   //wert von den lichtsensoren
 
@@ -38,6 +45,13 @@ void setup()
   Serial.begin(9600); // computer usb
   Serial1.begin(9600); //pin
   Serial.println("Teensy bereit ....");
+  Serial2.begin(9600);
+  while(!Serial2)
+  {
+    Serial.println("kein boden teensy");
+  }
+
+  tinymovr_setup();
 }
 
 void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definition siehe oben
@@ -142,6 +156,25 @@ void ZuBallFahren()
   maxgeschw();
 }
 
+void LiniePrüfen()
+{
+  int length = Serial2.available();
+  for(int i = 0; i < length; i++)
+  {
+    int msgT = Serial2.read();
+    linie = false;
+  }
+/*
+  if(msgT != 0)   //todo
+  {
+    //umdrehen
+    linie = true;
+    zustand = 2;
+    //led gelb
+    Serial.println(msgT);
+  }*/
+}
+
 void Linie()
 {
   if(linie)
@@ -177,11 +210,11 @@ void BallNehmen()       //siehe Orion onion2.png
     }
     else if(150 < ballrichtung && ballrichtung < 210)   //wenn der ball hinter dem Roberter ist
     { 
-      if(0 <= torrichtung && torrichtung <= 180)
+      if(0 <= gegentor && gegentor <= 180)
       {
         zw = 135;
       }
-      if(180 < torrichtung && torrichtung <= 360)
+      if(180 < gegentor && gegentor <= 360)
       {
         zw = 225;
       }
@@ -206,45 +239,27 @@ void BallNehmen()       //siehe Orion onion2.png
 
 void loop() // hauptmethode
 {
-  /*
-  bool maxgesch = true;
-  delay(5);
-  Serial.print("Zielwinkel:");
-  Serial.println(zw);
-  GeschwindigkeitBerechnen(wr1, zw, zg);
-  GeschwindigkeitBerechnen(wr2, zw, zg);
-  GeschwindigkeitBerechnen(wr3, zw, zg);
-  // Serial.println("Test");
-
-  if (maxgesch == true)
-  {
-    maxgeschw();
-  }
-  Ausrichtung();
-  Serial.print("Drehung: ");
-  Serial.println(vr1 + vr2 + vr3);
-
-  if (zw < 360)
-  {
-    zw = zw + 1;
-  }
-  else
-  {
-    while (true)
-    {
-      Serial.println("fertig");
-      delay(10000);
-    }
-  }
-  */
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------
   if(Serial1.available())
   {
   String receivedData = Serial1.readStringUntil('\n');
   Serial.print("Empfangen: ");
   Serial.println(receivedData);
   }
-  
-  switch (i)
+  sscanf(receivedData.c_str(), "%d %d %d", &ballrichtung, &gelbtor, &blautor);
+
+  if(BinGelb == true)
+  {
+    eigentor = gelbtor;
+    gegentor = blautor;
+  }
+  else
+  {
+    eigentor = blautor;
+    gegentor = gelbtor;
+  }
+
+  switch (i) //aufzug
   {
     case 0:
       Serial.println("Test            |");
@@ -292,4 +307,35 @@ void loop() // hauptmethode
       break;
   }
  delay(50);
+  /*
+  bool maxgesch = true;
+  delay(5);
+  Serial.print("Zielwinkel:");
+  Serial.println(zw);
+  GeschwindigkeitBerechnen(wr1, zw, zg);
+  GeschwindigkeitBerechnen(wr2, zw, zg);
+  GeschwindigkeitBerechnen(wr3, zw, zg);
+  // Serial.println("Test");
+
+  if (maxgesch == true)
+  {
+    maxgeschw();
+  }
+  Ausrichtung();
+  Serial.print("Drehung: ");
+  Serial.println(vr1 + vr2 + vr3);
+
+  if (zw < 360)
+  {
+    zw = zw + 1;
+  }
+  else
+  {
+    while (true)
+    {
+      Serial.println("fertig");
+      delay(10000);
+    }
+  }
+  */
 }
