@@ -3,6 +3,7 @@
 #include "motor.h"
 
 /*
+Winkel immer im uhrzeigersinn
 Motoren festlegung:
 MU = MitUhrzeigersinn (von außen) positiv
 GU = GegenUhrzeigersinn           negativ
@@ -12,23 +13,27 @@ motor2 vorne rechts
 motor3 hinten
 distance/speed ratio = cos(WinkelVonRadZuBewegungsrichtung)*(strecke die ich fahren will/speed vom geraden Rad)
 */
+//global
 int wr1 = -30; // winkel von rad1 zu 0°
 int wr2 = 30;
 int wr3 = 90;
 int zw = 0;   // Zielwinkel
 int zg = 100; // Zielgeschwindigkeit
 
+//Geschw. Berechnen
 double vr1; // void maxgeschw zum fahrend der höchstegeschwindigkeit: verhältnis rad 1
 double vr2;
 double vr3;
+double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
+
+//Maxgeschw
 double faktor = 0;
 
 int CompIn; // void Ausrichtung
 int AusrAnpassung;
 
-double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß umrechnen; double für mehr nachkommastellen
-
-int ballrichtung;   //werte, die ich von der kamera bekomme
+//Kamerawerte vom RPi
+int ballrichtung;
 int gelbtor;
 int blautor;
 bool BinGelb;
@@ -36,9 +41,16 @@ int gegentor;
 int eigentor;
 String receivedData = "1 1 1\n";
 
+//variablen für anpassung von ausrichtung
+int compnow;
+int compold;
+int turnspeed;
+int angleoffset;
+int turntime;
+
 bool linie;   //wert von den lichtsensoren
 
-int i = 0; //for fun
+int i = 0; //for fun [Aufzug]
 
 void setup()
 {
@@ -58,7 +70,7 @@ void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definiti
 {
   bogenmass = (zw - Radwinkel) * 3.14159 / 180; // zw-Radwinkel gibt winkel von rad zu zielrichtung an *pi/180 ist winkel in bogenmaß
   int RadGesch = cos(bogenmass) * zg;   //berechnet die drehgeschwindigkeit
-  if (Radwinkel == wr1)   //vorzeichen setzen
+  if (Radwinkel == wr1)   //vorzeichen setzen für jedes rad
   {
     if ((240 < Fahrwinkel && Fahrwinkel <= 360) || (0 <= Fahrwinkel && Fahrwinkel < 60))
     {
@@ -73,7 +85,7 @@ void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definiti
     vr1 = RadGesch;
   }
 
-  else if (Radwinkel == wr2)
+  else if (Radwinkel == wr2)    //vorzeichen setzen für jedes rad
   {
     if (120 < Fahrwinkel && Fahrwinkel < 300)
     {
@@ -88,7 +100,7 @@ void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definiti
     vr2 = RadGesch;
   }
 
-  else if (Radwinkel == wr3)
+  else if (Radwinkel == wr3)    //vorzeichen setzen für jedes rad
   {
     if (0 < Fahrwinkel && Fahrwinkel < 180)
     {
@@ -105,7 +117,7 @@ void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definiti
   // Serial.println(cos(bogenmass));
 }
 
-void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgeschwindigkeit setzen und die anderen anpassen
+void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgeschwindigkeit gesetzt werden und die anderen anpassen
 {
   if (abs(vr1) >= abs(vr2) && abs(vr1) >= abs(vr3)) // rad 1 am schnellsten
   {
@@ -132,13 +144,13 @@ void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgesc
   Serial.println(vr3);
 }
 
-void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist
+void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist 180 ist hinten 0 ist vorne
 {
-  if (1 < CompIn && CompIn <=180)
+  if (1 < CompIn && CompIn <=180)   //rechts gedreht
   {
     AusrAnpassung = 50;
   }
-  else if (180 < CompIn && CompIn < 359)
+  else if (180 < CompIn && CompIn < 359)    //links gedreht
   {
     AusrAnpassung = -50;
   }
@@ -147,7 +159,7 @@ void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist
   vr3 = vr3 + AusrAnpassung;
 }
 
-void ZuBallFahren()
+void ZuBallFahren()   //fährt einfach in richtung ball
 {
   zw = ballrichtung;
   GeschwindigkeitBerechnen(wr1, zw, zg);
@@ -175,7 +187,7 @@ void LiniePrüfen()
   }*/
 }
 
-void Linie()
+void Linie()    //wenn linie, dann einfach umdrehen
 {
   if(linie)
   {
@@ -188,6 +200,13 @@ void Linie()
       zw = zw - 180;
     }
   }
+}
+
+void Drehen(int drehgeschw)              //- links + rechts
+{
+  vr1 = vr1 - drehgeschw;
+  vr2 = vr2 - drehgeschw;
+  vr3 = vr3 - drehgeschw;
 }
 
 void BallNehmen()       //siehe Orion onion2.png 
@@ -237,9 +256,70 @@ void BallNehmen()       //siehe Orion onion2.png
     maxgeschw();
   }
 
+int complesen(){};
+
+void PID_Drive(int speed, int angle)    //in dev
+{
+  GeschwindigkeitBerechnen(wr1, angle, speed);
+  GeschwindigkeitBerechnen(wr2, angle, speed);
+  GeschwindigkeitBerechnen(wr3, angle, speed);
+
+  compold = compnow;
+  compnow = complesen();
+  turnspeed = abs(compold - compnow);
+  if(compnow <= 180)    // links gedreht, negativer offset, rechts positiv
+  {
+    angleoffset = compnow;
+  }
+  else if(compnow > 180)
+  {
+    angleoffset = -360 + compnow;
+  }
+
+  if (abs(vr1) >= abs(vr2) && abs(vr1) >= abs(vr3)) // rad 1 am schnellsten
+  {
+    if(angleoffset < 0)
+    {
+      vr2 = vr2 - 10;
+      vr3 = vr3 - 10;
+    }
+    else if(angleoffset > 0)
+    {
+      vr2 = vr2 + 10;
+      vr3 = vr3 + 10;
+    }
+  }
+  else if (abs(vr2) >= abs(vr1) && abs(vr2) >= abs(vr3)) // rad 2 am schnellsten
+  {
+    if(angleoffset < 0)
+    {
+      vr1 = vr1 - 10;
+      vr3 = vr3 - 10;
+    }
+    else if(angleoffset > 0)
+    {
+      vr1 = vr1 + 10;
+      vr3 = vr3 + 10;
+    }
+  }
+  else if (abs(vr3) >= abs(vr1) && abs(vr3) >= abs(vr2)) // rad 3 am schnellsten
+  {
+    if(angleoffset < 0)
+    {
+      vr2 = vr2 - 10;
+      vr1 = vr1 - 10;
+    }
+    else if(angleoffset > 0)
+    {
+      vr2 = vr2 + 10;
+      vr1 = vr1 + 10;
+    }
+  }
+
+}
+
 void loop() // hauptmethode
 {
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------
   if(Serial1.available())
   {
   String receivedData = Serial1.readStringUntil('\n');
