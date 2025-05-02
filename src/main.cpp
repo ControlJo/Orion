@@ -32,6 +32,8 @@ double faktor = 0;
 int CompIn; // void Ausrichtung
 int AusrAnpassung;
 
+int sl;    //sl für speedlimits ( verwendet in Drehen )
+
 //Kamerawerte vom RPi
 int ballrichtung;
 int gelbtor;
@@ -204,9 +206,44 @@ void Linie()    //wenn linie, dann einfach umdrehen
 
 void Drehen(int drehgeschw)              //- links + rechts
 {
-  vr1 = vr1 - drehgeschw;
-  vr2 = vr2 - drehgeschw;
-  vr3 = vr3 - drehgeschw;
+  if (drehgeschw > 0)   // einfach drehen ohne berücksichtigen von maximalgeschwindigkeit
+  {
+    vr1 = vr1 - drehgeschw;
+    vr2 = vr2 - drehgeschw;
+    vr3 = vr3 - drehgeschw;
+  }
+  else if (drehgeschw < 0)
+  {
+    vr1 = vr1 + drehgeschw;
+    vr2 = vr2 + drehgeschw;
+    vr3 = vr3 + drehgeschw;
+  }
+  if(vr1 > 100)   //abfangen von werten > maxgesch.
+  {
+    vr1 = 100;
+  }
+  else if(vr1 < -100)
+  {
+    vr1 = -100;
+  }
+
+  if(vr2 > 100)
+  {
+    vr2 = 100;
+  }
+  else if(vr2 < -100)
+  {
+    vr2 = -100;
+  }
+  
+  if(vr3 > 100)
+  {
+    vr3 = 100;
+  }
+  else if(vr3 < -100)
+  {
+    vr3 = -100;
+  }
 }
 
 void BallNehmen()       //siehe Orion onion2.png 
@@ -275,47 +312,7 @@ void PID_Drive(int speed, int angle)    //in dev
   {
     angleoffset = -360 + compnow;
   }
-
-  if (abs(vr1) >= abs(vr2) && abs(vr1) >= abs(vr3)) // rad 1 am schnellsten
-  {
-    if(angleoffset < 0)
-    {
-      vr2 = vr2 - 10;
-      vr3 = vr3 - 10;
-    }
-    else if(angleoffset > 0)
-    {
-      vr2 = vr2 + 10;
-      vr3 = vr3 + 10;
-    }
-  }
-  else if (abs(vr2) >= abs(vr1) && abs(vr2) >= abs(vr3)) // rad 2 am schnellsten
-  {
-    if(angleoffset < 0)
-    {
-      vr1 = vr1 - 10;
-      vr3 = vr3 - 10;
-    }
-    else if(angleoffset > 0)
-    {
-      vr1 = vr1 + 10;
-      vr3 = vr3 + 10;
-    }
-  }
-  else if (abs(vr3) >= abs(vr1) && abs(vr3) >= abs(vr2)) // rad 3 am schnellsten
-  {
-    if(angleoffset < 0)
-    {
-      vr2 = vr2 - 10;
-      vr1 = vr1 - 10;
-    }
-    else if(angleoffset > 0)
-    {
-      vr2 = vr2 + 10;
-      vr1 = vr1 + 10;
-    }
-  }
-
+  
 }
 
 void loop() // hauptmethode
