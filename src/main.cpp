@@ -146,6 +146,12 @@ void maxgeschw()      //Das rad, dass am schnellsten drehen soll auf maximalgesc
   Serial.println(vr3);
 }
 
+void getPos()
+{
+  
+}
+
+/*
 void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist 180 ist hinten 0 ist vorne
 {
   if (1 < CompIn && CompIn <=180)   //rechts gedreht
@@ -160,6 +166,7 @@ void Ausrichtung()      //Damit der roboter immer korrekt ausgerichtet ist 180 i
   vr2 = vr2 + AusrAnpassung;
   vr3 = vr3 + AusrAnpassung;
 }
+*/
 
 void ZuBallFahren()   //fährt einfach in richtung ball
 {
@@ -291,28 +298,46 @@ void BallNehmen()       //siehe Orion onion2.png
     GeschwindigkeitBerechnen(wr2, zw, zg);
     GeschwindigkeitBerechnen(wr3, zw, zg);
     maxgeschw();
+    
   }
 
-int complesen(){};
+int complesen(){}; //todo
 
-void PID_Drive(int speed, int angle)    //in dev
+void PID_Drive(int speed, int angle, bool max)    //in dev
 {
   GeschwindigkeitBerechnen(wr1, angle, speed);
   GeschwindigkeitBerechnen(wr2, angle, speed);
   GeschwindigkeitBerechnen(wr3, angle, speed);
+  if(max)
+  {
+    maxgeschw();
+  }
 
   compold = compnow;
   compnow = complesen();
   turnspeed = abs(compold - compnow);
-  if(compnow <= 180)    // links gedreht, negativer offset, rechts positiv
+  if (compnow <= 180)    // links gedreht, negativer offset, rechts positiv
   {
     angleoffset = compnow;
   }
-  else if(compnow > 180)
+  else if (compnow > 180)
   {
-    angleoffset = -360 + compnow;
+    angleoffset == -360 + compnow;
   }
-  
+  Drehen(-angleoffset);
+  if (-2 < angleoffset && angleoffset < 2) 
+  {
+    turntime = 0;
+  }
+  else
+  {
+    turntime = turntime + 1;
+  }
+  if(turntime >= 100)
+  {
+    // power increase?
+    
+  }
 }
 
 void loop() // hauptmethode
@@ -385,24 +410,17 @@ void loop() // hauptmethode
   }
  delay(50);
   /*
-  bool maxgesch = true;
+  //bool maxgesch = true;
   delay(5);
   Serial.print("Zielwinkel:");
   Serial.println(zw);
-  GeschwindigkeitBerechnen(wr1, zw, zg);
-  GeschwindigkeitBerechnen(wr2, zw, zg);
-  GeschwindigkeitBerechnen(wr3, zw, zg);
+  PID_Drive(100, zw, true);
   // Serial.println("Test");
 
-  if (maxgesch == true)
-  {
-    maxgeschw();
-  }
-  Ausrichtung();
   Serial.print("Drehung: ");
   Serial.println(vr1 + vr2 + vr3);
 
-  if (zw < 360)
+  if (zw < 360)   // dass alle winkel durchprobiert werden
   {
     zw = zw + 1;
   }
