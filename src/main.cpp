@@ -1,6 +1,14 @@
 #include <Arduino.h>
-#include "Kompass.h"
-#include "motor.h"
+
+#include <FlexCAN_T4.h>
+
+const int NODE_ID_1 = 1; // TinyMOVR vorne links
+const int NODE_ID_2 = 2; // TinyMOVR vorne rechts
+const int NODE_ID_3 = 3; // TinyMOVR hinten
+
+// === CAN-Objekt global anlegen ===
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can1;
+
 
 /*
 Winkel immer im uhrzeigersinn
@@ -29,7 +37,7 @@ double bogenmass; // weil der cosinus nur bogenmaß will-> winkel in bogenmaß u
 //Maxgeschw
 double faktor = 0;
 
-int CompIn; // void Ausrichtung
+int CompIn; // void Ausrichtung -> muss noch werte eingetragen bekommen
 int AusrAnpassung;
 
 int sl;    //sl für speedlimits ( verwendet in Drehen )
@@ -58,14 +66,71 @@ void setup()
 {
   Serial.begin(9600); // computer usb
   Serial1.begin(9600); //pin
-  Serial.println("Teensy bereit ....");
   Serial2.begin(9600);
+  Serial.println("Teensy bereit ....");
   while(!Serial2)
   {
     Serial.println("kein boden teensy");
   }
 
-  tinymovr_setup();
+  // CAN Setup
+  Can1.begin();
+  Can1.setBaudRate(1000000); // 1 Mbit/s
+  Serial.println("CAN gestartet...");
+
+  // tinymovr vorbereiten
+  initAllTinyMovrs();
+
+  delay(2000); // damit der Tinymovr wirklich bereit ist
+
+  if(BinGelb == true)
+  {
+    eigentor = gelbtor;
+    gegentor = blautor;
+  }
+  else
+  {
+    eigentor = blautor;
+    gegentor = gelbtor;
+  }
+}
+
+void calibrateTinyMovr(uint8_t node_id) {
+  CAN_message_t msg;
+  msg.id = 0x001 + node_id;
+  msg.len = 8;
+  msg.buf[0] = 0x07;  // Set Axis State
+  msg.buf[1] = 0x00;
+  msg.buf[2] = 0x03;  // FULL_CALIBRATION_SEQUENCE
+  for (int i = 3; i < 8; i++) msg.buf[i] = 0;
+  Can1.write(msg);
+  Serial.print("Kalibriere Node ");
+  Serial.println(node_id);
+  delay(5000); // Warte auf Abschluss (ca. 3–5 s)
+}
+
+
+void enableTinyMovr(uint8_t node_id) {
+  CAN_message_t msg;
+  msg.id = 0x001 + node_id;   // Adresse = 0x001 + Node-ID
+  msg.len = 8;
+  msg.buf[0] = 0x07;          // Befehl: "Set Axis State"
+  msg.buf[1] = 0x00;
+  msg.buf[2] = 0x08;          // Zielzustand: CLOSED_LOOP_CONTROL
+  msg.buf[3] = msg.buf[4] = msg.buf[5] = msg.buf[6] = msg.buf[7] = 0;
+  Can1.write(msg);
+}
+
+void initAllTinyMovrs() {
+  calibrateTinyMovr(NODE_ID_1);
+  calibrateTinyMovr(NODE_ID_2);
+  calibrateTinyMovr(NODE_ID_3);
+  delay(1000);
+  enableTinyMovr(NODE_ID_1);
+  enableTinyMovr(NODE_ID_2);
+  enableTinyMovr(NODE_ID_3);
+  delay(2000);
+  Serial.println("Alle TinyMovrs im Closed Loop.");
 }
 
 void GeschwindigkeitBerechnen(int Radwinkel, int Fahrwinkel, int zg) // Definition siehe oben
@@ -340,7 +405,29 @@ void PID_Drive(int speed, int angle, bool max)    //in dev
   }
 }
 
-void loop() // hauptmethode
+void sendSpeedToTinyMovr(uint8_t node_id, float speed) {
+  CAN_message_t msg;
+  msg.id = 0x00D + node_id;   // Offizielle ID für "Set Input Velocity"
+  msg.len = 4;
+  memcpy(msg.buf, &speed, sizeof(float));
+  Can1.write(msg);
+}
+
+void SimpleDrive(int speed, int angle)
+{
+  // Geschwindigkeitswerte berechnen
+  GeschwindigkeitBerechnen(wr1, angle, speed);
+  GeschwindigkeitBerechnen(wr2, angle, speed);
+  GeschwindigkeitBerechnen(wr3, angle, speed);
+
+  // Werte an TinyMovr senden
+  sendSpeedToTinyMovr(NODE_ID_1, vr1);
+  sendSpeedToTinyMovr(NODE_ID_2, vr2);
+  sendSpeedToTinyMovr(NODE_ID_3, vr3);
+
+}
+
+void doPiCommunication()
 {
   if(Serial1.available())
   {
@@ -349,66 +436,15 @@ void loop() // hauptmethode
   Serial.println(receivedData);
   }
   sscanf(receivedData.c_str(), "%d %d %d", &ballrichtung, &gelbtor, &blautor);
+}
 
-  if(BinGelb == true)
-  {
-    eigentor = gelbtor;
-    gegentor = blautor;
-  }
-  else
-  {
-    eigentor = blautor;
-    gegentor = gelbtor;
-  }
+void loop() // hauptmethode
+{
+  doPiCommunication();
+  delay(50);
 
-  switch (i) //aufzug
-  {
-    case 0:
-      Serial.println("Test            |");
-      i = i + 1;
-      break;
-    case 1:
-      Serial.println("Test        ____|____");
-      i = i + 1;
-      break;
-    case 2:
-      Serial.println("Test        |       |");
-      i = i + 1;
-      break;
-    case 3:
-      Serial.println("Test        | _ O _ |");
-      i = i + 1;
-      break;
-    case 4:
-      Serial.println("Test        |  [|]  |");
-      i = i + 1;
-      break;
-    case 5:
-      Serial.println("Test        |  | |  |");
-      i = i + 1;
-      break;
-    case 6:
-      Serial.println("Test        |_______|");
-      i = i + 1;
-      break;
-    case 7:
-      Serial.println("Test            |");
-      i = i + 1;
-      break;
-    case 8:
-      Serial.println("Test            |");
-      i = i + 1;
-      break;
-    case 9:
-      Serial.println("Test            |");
-      i = i + 1;
-      break;
-    case 10:
-      Serial.println("Test            |");
-      i = 0;
-      break;
-  }
- delay(50);
+  SimpleDrive(10,0);
+
   /*
   //bool maxgesch = true;
   delay(5);
