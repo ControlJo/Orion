@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SPI.h>
 
 #include <FlexCAN_T4.h>
 
@@ -60,40 +61,6 @@ int turntime;
 
 bool linie;   //wert von den lichtsensoren
 
-int i = 0; //for fun [Aufzug]
-
-void setup()
-{
-  Serial.begin(9600); // computer usb
-  Serial1.begin(9600); //pin
-  Serial2.begin(9600);
-  Serial.println("Teensy bereit ....");
-  while(!Serial2)
-  {
-    Serial.println("kein boden teensy");
-  }
-
-  // CAN Setup
-  Can1.begin();
-  Can1.setBaudRate(1000000); // 1 Mbit/s
-  Serial.println("CAN gestartet...");
-
-  // tinymovr vorbereiten
-  initAllTinyMovrs();
-
-  delay(2000); // damit der Tinymovr wirklich bereit ist
-
-  if(BinGelb == true)
-  {
-    eigentor = gelbtor;
-    gegentor = blautor;
-  }
-  else
-  {
-    eigentor = blautor;
-    gegentor = gelbtor;
-  }
-}
 
 void calibrateTinyMovr(uint8_t node_id) {
   CAN_message_t msg;
@@ -436,6 +403,39 @@ void doPiCommunication()
   Serial.println(receivedData);
   }
   sscanf(receivedData.c_str(), "%d %d %d", &ballrichtung, &gelbtor, &blautor);
+}
+
+void setup()
+{
+  Serial.begin(9600); // computer usb
+  Serial1.begin(9600); //pin
+  Serial2.begin(9600);
+  Serial.println("Teensy bereit ....");
+  while(!Serial2)
+  {
+    Serial.println("kein boden teensy");
+  }
+
+  // CAN Setup
+  Can1.begin();
+  Can1.setBaudRate(1000000); // 1 Mbit/s
+  Serial.println("CAN gestartet...");
+
+  // tinymovr vorbereiten
+  initAllTinyMovrs();
+
+  delay(2000); // damit der Tinymovr wirklich bereit ist
+
+  if(BinGelb == true)
+  {
+    eigentor = gelbtor;
+    gegentor = blautor;
+  }
+  else
+  {
+    eigentor = blautor;
+    gegentor = gelbtor;
+  }
 }
 
 void loop() // hauptmethode
