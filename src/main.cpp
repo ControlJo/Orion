@@ -407,6 +407,10 @@ void doPiCommunication()
 
 void setup()
 {
+  Serial.println("starting...");
+  delay(1000);
+  Serial.println("los!");
+
   Serial.begin(9600); // computer usb
   Serial1.begin(9600); //pin
   Serial2.begin(9600);
@@ -426,6 +430,8 @@ void setup()
 
   delay(2000); // damit der Tinymovr wirklich bereit ist
 
+  Serial.println("jetzt gehts los");
+
   if(BinGelb == true)
   {
     eigentor = gelbtor;
@@ -440,10 +446,12 @@ void setup()
 
 void loop() // hauptmethode
 {
-  doPiCommunication();
-  delay(50);
+  //doPiCommunication();
+  delay(2000);
 
   SimpleDrive(10,0);
+
+  //Serial.println("test");
 
   /*
   //bool maxgesch = true;
