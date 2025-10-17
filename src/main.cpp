@@ -3,12 +3,16 @@
 
 #include <FlexCAN_T4.h>
 
-const int NODE_ID_1 = 1; // TinyMOVR vorne links
-const int NODE_ID_2 = 2; // TinyMOVR vorne rechts
-const int NODE_ID_3 = 3; // TinyMOVR hinten
+const int NODE_ID_1 = 0; // TinyMOVR vorne links
+const int NODE_ID_2 = 1; // TinyMOVR vorne rechts
+const int NODE_ID_3 = 2; // TinyMOVR hinten
 
 // === CAN-Objekt global anlegen ===
-FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can1;
+FlexCAN_T4<CAN2, RX_SIZE_256, TX_SIZE_16> Can2;
+
+#define MAX_MOTORS 255
+uint32_t motorIDs[MAX_MOTORS];
+uint8_t foundMotors = 0;
 
 
 /*
@@ -70,7 +74,7 @@ void calibrateTinyMovr(uint8_t node_id) {
   msg.buf[1] = 0x00;
   msg.buf[2] = 0x03;  // FULL_CALIBRATION_SEQUENCE
   for (int i = 3; i < 8; i++) msg.buf[i] = 0;
-  Can1.write(msg);
+  Can2.write(msg);
   Serial.print("Kalibriere Node ");
   Serial.println(node_id);
   delay(5000); // Warte auf Abschluss (ca. 3–5 s)
@@ -85,7 +89,7 @@ void enableTinyMovr(uint8_t node_id) {
   msg.buf[1] = 0x00;
   msg.buf[2] = 0x08;          // Zielzustand: CLOSED_LOOP_CONTROL
   msg.buf[3] = msg.buf[4] = msg.buf[5] = msg.buf[6] = msg.buf[7] = 0;
-  Can1.write(msg);
+  Can2.write(msg);
 }
 
 void initAllTinyMovrs() {
@@ -377,7 +381,7 @@ void sendSpeedToTinyMovr(uint8_t node_id, float speed) {
   msg.id = 0x00D + node_id;   // Offizielle ID für "Set Input Velocity"
   msg.len = 4;
   memcpy(msg.buf, &speed, sizeof(float));
-  Can1.write(msg);
+  Can2.write(msg);
 }
 
 void SimpleDrive(int speed, int angle)
@@ -405,25 +409,70 @@ void doPiCommunication()
   sscanf(receivedData.c_str(), "%d %d %d", &ballrichtung, &gelbtor, &blautor);
 }
 
+void findMotors()
+{
+  Serial.println("🔍 Scanne nach aktiven CAN-Geräten...");
+  unsigned long start = millis();
+
+  while (millis() - start < 5000) { // 5 Sekunden lang lauschen
+    CAN_message_t msg;
+    if (Can2.read(msg)) {  // Wenn eine Nachricht empfangen wurde
+      bool known = false;
+      Serial.println("nachricht gekommen");
+
+      // Prüfen, ob diese ID schon bekannt ist
+      for (uint8_t i = 0; i < foundMotors; i++) {
+        if (motorIDs[i] == msg.id) known = true;
+      }
+
+      // Wenn die ID neu ist, speichern
+      if (!known && foundMotors < MAX_MOTORS) {
+        motorIDs[foundMotors++] = msg.id;
+        Serial.printf("✅ Neuer Motor gefunden! CAN-ID: %lu (0x%03lX)\n",
+        msg.id, msg.id);
+      }
+    }
+  }
+
+  Serial.println("\nGefundene Motoren:");
+for (uint8_t i = 0; i < foundMotors; i++) {
+  Serial.printf(" - Motor %u → CAN-ID: %lu (0x%03lX)\n",
+  i + 1, motorIDs[i], motorIDs[i]);
+}
+if (foundMotors == 0) Serial.println("⚠️ Keine Motoren gefunden!");
+}
+
 void setup()
 {
+  Serial.begin(9600); // computer usb
+  Serial1.begin(9600); //pin
+  Serial2.begin(9600);
+
   Serial.println("starting...");
   delay(1000);
   Serial.println("los!");
 
-  Serial.begin(9600); // computer usb
-  Serial1.begin(9600); //pin
-  Serial2.begin(9600);
   Serial.println("Teensy bereit ....");
-  while(!Serial2)
-  {
-    Serial.println("kein boden teensy");
-  }
+  //while(!Serial2)
+  //{
+  //  Serial.println("kein boden teensy");
+  //}
 
   // CAN Setup
-  Can1.begin();
-  Can1.setBaudRate(1000000); // 1 Mbit/s
+  Can2.begin();
+  Can2.setBaudRate(1000000); // 1 Mbit/s
+  Can2.enableFIFO();
+  Can2.enableFIFOInterrupt();
+
   Serial.println("CAN gestartet...");
+
+  Serial.println("warte 10 sekunden");
+  delay(10000);
+  
+
+
+  findMotors();
+  Serial.println("Motoren gesucht und hoffentlich gefunden");
 
   // tinymovr vorbereiten
   initAllTinyMovrs();
@@ -447,9 +496,12 @@ void setup()
 void loop() // hauptmethode
 {
   //doPiCommunication();
+
   delay(2000);
 
-  SimpleDrive(10,0);
+  //SimpleDrive(10,0);
+
+  findMotors();
 
   //Serial.println("test");
 
