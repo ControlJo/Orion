@@ -8,7 +8,7 @@ const int NODE_ID_2 = 1; // TinyMOVR vorne rechts
 const int NODE_ID_3 = 2; // TinyMOVR hinten
 
 // === CAN-Objekt global anlegen ===
-FlexCAN_T4<CAN2, RX_SIZE_256, TX_SIZE_16> Can2;
+FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> Can;
 
 #define MAX_MOTORS 255
 uint32_t motorIDs[MAX_MOTORS];
@@ -74,7 +74,7 @@ void calibrateTinyMovr(uint8_t node_id) {
   msg.buf[1] = 0x00;
   msg.buf[2] = 0x03;  // FULL_CALIBRATION_SEQUENCE
   for (int i = 3; i < 8; i++) msg.buf[i] = 0;
-  Can2.write(msg);
+  Can.write(msg);
   Serial.print("Kalibriere Node ");
   Serial.println(node_id);
   delay(5000); // Warte auf Abschluss (ca. 3–5 s)
@@ -89,7 +89,7 @@ void enableTinyMovr(uint8_t node_id) {
   msg.buf[1] = 0x00;
   msg.buf[2] = 0x08;          // Zielzustand: CLOSED_LOOP_CONTROL
   msg.buf[3] = msg.buf[4] = msg.buf[5] = msg.buf[6] = msg.buf[7] = 0;
-  Can2.write(msg);
+  Can.write(msg);
 }
 
 void initAllTinyMovrs() {
@@ -381,7 +381,7 @@ void sendSpeedToTinyMovr(uint8_t node_id, float speed) {
   msg.id = 0x00D + node_id;   // Offizielle ID für "Set Input Velocity"
   msg.len = 4;
   memcpy(msg.buf, &speed, sizeof(float));
-  Can2.write(msg);
+  Can.write(msg);
 }
 
 void SimpleDrive(int speed, int angle)
@@ -416,7 +416,7 @@ void findMotors()
 
   while (millis() - start < 5000) { // 5 Sekunden lang lauschen
     CAN_message_t msg;
-    if (Can2.read(msg)) {  // Wenn eine Nachricht empfangen wurde
+    if (Can.read(msg)) {  // Wenn eine Nachricht empfangen wurde
       bool known = false;
       Serial.println("nachricht gekommen");
 
@@ -459,10 +459,10 @@ void setup()
   //}
 
   // CAN Setup
-  Can2.begin();
-  Can2.setBaudRate(1000000); // 1 Mbit/s
-  Can2.enableFIFO();
-  Can2.enableFIFOInterrupt();
+  Can.begin();
+  Can.setBaudRate(1000000); // 1 Mbit/s
+  Can.enableFIFO();
+  Can.enableFIFOInterrupt();
 
   Serial.println("CAN gestartet...");
 
