@@ -78,7 +78,7 @@ class MotorController{
 
     // returns the object of one motor to make indivitual actions possible
     controlMotor getLeftMotor()     {   return motorLeft;   }
-    controlMotor getBackMotor()     {   return motorLeft;   }
-    controlMotor getRightMotor()    {   return motorLeft;   }
+    controlMotor getBackMotor()     {   return motorBack;   }
+    controlMotor getRightMotor()    {   return motorRight;   }
 
 };
