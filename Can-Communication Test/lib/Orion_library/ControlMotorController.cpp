@@ -1,7 +1,7 @@
 #include "controlMotor.cpp"
 
 
-class MotorController{
+class motorController{
     // initialization list
     // -> makes clear the following objects have to be initialized before calling the constructor
     private:
@@ -9,17 +9,48 @@ class MotorController{
     controlMotor motorBack;
     controlMotor motorRight;
 
-    MotorController()   // constructor
+    public:
+    motorController()   // constructor
        :motorLeft(1),
         motorBack(2),
         motorRight(3)
     {}
 
     // calls the calibrate method for all motors
-    void CalibrateAll() {
+    void calibrateAll() {
         motorLeft.calibrate();
         motorBack.calibrate();
         motorRight.calibrate();
+    }
+
+    void closedLoop() {
+        motorLeft.closedLoop();
+        motorBack.closedLoop();
+        motorRight.closedLoop();
+    }
+
+    void positionMode() {
+        motorLeft.positionMode();
+        motorBack.positionMode();
+        motorRight.positionMode();
+    }
+
+    void velocityMode() {
+        motorLeft.velocityMode();
+        motorBack.velocityMode();
+        motorRight.velocityMode();
+    }
+
+    void idle() {
+        motorLeft.setIdle();
+        motorBack.setIdle();
+        motorRight.setIdle();
+    }
+
+    void reset() {
+        motorLeft.reset();
+        motorBack.reset();
+        motorRight.reset();
     }
 
     float calculateMotorSpeed(controlMotor motor, float driveAngle, int targetVelocity)
@@ -39,11 +70,29 @@ class MotorController{
         motorRight.setVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
+    void addToCurrentVelocityVector(float angle, float speed) {
+        motorLeft.addVelocity(calculateMotorSpeed(motorLeft, angle, speed));
+        motorBack.addVelocity(calculateMotorSpeed(motorBack, angle, speed));
+        motorRight.addVelocity(calculateMotorSpeed(motorRight, angle, speed));
+    }
+
     // adds a speed to all motors to achieve a turning motion
     void addTurnSpeed(float turnspeed) {
         motorLeft.addVelocity(turnspeed);
         motorBack.addVelocity(turnspeed);
         motorRight.addVelocity(turnspeed);
+    }
+
+    void addPosiition(float relativePosition) {
+        motorLeft.addPosition(relativePosition);
+        motorBack.addPosition(relativePosition);
+        motorRight.addPosition(relativePosition);
+    }
+
+    void setVelocity(float speed) {
+        motorLeft.setVelocity(speed);
+        motorBack.setVelocity(speed);
+        motorRight.setVelocity(speed);
     }
 
     // prints the info of all Motors into the console

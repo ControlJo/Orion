@@ -1,12 +1,11 @@
-#include "controlMotor.cpp"
 #include "Arduino.h"
 #include "FlexCAN_T4.h"
 #include "tinymovr.hpp"
+#include "controlMotorController.cpp"
 
-// ---------------------- Motor objects --------------------------
-controlMotor motorVorneLinks(1);
-controlMotor motorVorneRechts(3);
-controlMotor motorHinten(2);
+// ---------------------- Motor controller object --------------------------
+
+motorController controller;
 
 // ---------------------- Arduino setup -----------------------------
 void setup()
@@ -32,95 +31,69 @@ void loop()
     // ---------------- Normale Buchstabenbefehle ----------------
     if (receivedChar == 'Q') {
       Serial.println("Received Calibration command");
-      motorVorneLinks.calibrate();
-      motorVorneRechts.calibrate();
-      motorHinten.calibrate();
+      controller.calibrateAll();
     }
     else if (receivedChar == 'A') {
       Serial.println("Received Closed Loop command");
-      motorVorneLinks.closedLoop();
-      motorVorneRechts.closedLoop();
-      motorHinten.closedLoop();
-      motorVorneLinks.positionMode(); // Position Mode
-      motorVorneRechts.positionMode();
-      motorHinten.positionMode();
+      controller.closedLoop();
+      controller.positionMode();
     }
     else if (receivedChar == 'Z') {
       Serial.println("Received Idle command");
-      motorVorneLinks.idle();
-      motorVorneRechts.idle();
-      motorHinten.idle();
+      controller.idle();
     }
     else if (receivedChar == 'R') {
       Serial.println("Received reset command");
-      motorVorneLinks.reset();
-      motorVorneRechts.reset();
-      motorHinten.reset();
+      controller.reset();
     }
     else if (receivedChar == '<') {
       Serial.println("Received L turn command");
-      motorVorneLinks.addPosition(-8192);
-      motorVorneRechts.addPosition(-8192);
-      motorHinten.addPosition(-8192);
+      controller.addPosiition(200);
     }
     else if (receivedChar == '>') {
       Serial.println("Received R turn command");
-      motorVorneLinks.addPosition(8192);
-      motorVorneRechts.addPosition(8192);
-      motorHinten.addPosition(8192);
+      controller.addPosiition(-200);
     }
     else if (receivedChar == 'I') {
-      motorVorneLinks.info();
-      motorVorneRechts.info();
-      motorHinten.info();
+      controller.infoAll();
     }
     else if (receivedChar == 'V') {
       Serial.println("Switching to Velocity Mode");
-      motorVorneLinks.closedLoop(); // Closed Loop
-      motorVorneLinks.velocityMode();  // Velocity Mode
-      motorVorneLinks.setVelocity(0);
+      controller.closedLoop(); // Closed Loop
+      controller.velocityMode();  // Velocity Mode
+      controller.setVelocity(0);
       Serial.println("Velocity set to 0");
     }
     else if( receivedChar == 'p') {
-      motorVorneLinks.addVelocity(1);
+      controller.getLeftMotor().addVelocity(1);
     }
     else if( receivedChar == 'o') {
-      motorVorneLinks.addVelocity(-1);
+      controller.getLeftMotor().addVelocity(-1);
     }
     // ----------------- driving control ---------------------
     else if( receivedChar == 'w') {
       Serial.print("Received forwards drive command");
-      motorVorneLinks.addPosition(-200);
-      motorVorneRechts.addPosition(200);
+      controller.drive(0, 100);
     }
     else if( receivedChar == 's') {
       Serial.print("Received backwards drive command");
-      motorVorneLinks.addPosition(200);
-      motorVorneRechts.addPosition(-200);
+      controller.drive(180, 100);
     }
     else if( receivedChar == 'a') {
       Serial.print("Received left drive command");
-      motorVorneLinks.addPosition(200);
-      motorVorneRechts.addPosition(200);
-      motorHinten.addPosition(-200);
+      controller.drive(90, 100);
     }
     else if( receivedChar == 'd') {
       Serial.print("Received right drive command");
-      motorVorneLinks.addPosition(-200);
-      motorVorneRechts.addPosition(-200);
-      motorHinten.addPosition(200);
+      controller.drive(270, 100);
     }
     else if( receivedChar == 'q') {
       Serial.print("Received left turn command");
-      motorVorneLinks.addPosition(200);
-      motorVorneRechts.addPosition(200);
-      motorHinten.addPosition(200);
+      controller.addPosiition(200);
     }
     else if( receivedChar == 'e') {
       Serial.print("Received right turn command");
-      motorVorneLinks.addPosition(-200);
-      motorVorneRechts.addPosition(-200);
-      motorHinten.addPosition(-200);
+      controller.addPosiition(-200);
     }
   }
   delay(50);
