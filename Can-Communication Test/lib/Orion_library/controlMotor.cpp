@@ -68,7 +68,6 @@ class controlMotor{
     }
   }
 
-
   boolean inClosedLoop() { return tinymovr.controller.get_state() == 2; }
 
   void calibrate()    { tinymovr.controller.set_state(1); }
