@@ -16,8 +16,7 @@ class motorController{
         motorRight(3)
     {}
 
-    // calls the calibrate method for all motors
-    void calibrateAll() {
+    void calibrate() {
         motorLeft.calibrate();
         motorBack.calibrate();
         motorRight.calibrate();

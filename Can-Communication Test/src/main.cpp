@@ -7,11 +7,19 @@
 
 motorController controller;
 
+// ------------------------ pi comm ------------------------------------
+
+int ballrichtung;
+int gelbtor;
+int blautor;
+
 // ---------------------- Arduino setup -----------------------------
 void setup()
 {
   Serial.begin(115200);
   while (!Serial && millis() < 2000) {}
+
+  Serial1.begin(9600);
 
   // Start CAN1 @ 1 Mbps
   Can1.begin();
@@ -22,16 +30,32 @@ void setup()
   Serial.println("Teensy + FlexCAN_T4 ready.");
 }
 
+void doPiCommunication()
+{
+  String receivedData;
+  if(Serial1.available())
+  {
+    receivedData = Serial1.readStringUntil('\n');
+    Serial.print("Empfangen: ");
+    Serial.println(receivedData);
+  }
+  sscanf(receivedData.c_str(), "%d %d %d", &ballrichtung, &gelbtor, &blautor);
+}
+
 // ---------------------- Arduino loop -----------------------------
 void loop()
 {
+
+  Serial.println("test");
+  doPiCommunication();
+
   while (Serial.available() > 0) {
     char receivedChar = Serial.read();
 
     // ---------------- Normale Buchstabenbefehle ----------------
     if (receivedChar == 'Q') {
       Serial.println("Received Calibration command");
-      controller.calibrateAll();
+      controller.calibrate();
     }
     else if (receivedChar == 'A') {
       Serial.println("Received Closed Loop command");
