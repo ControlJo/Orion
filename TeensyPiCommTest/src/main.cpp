@@ -1,6 +1,4 @@
-#include <Arduino.h>
-#include "controlMotor.cpp"
-#include "ControlMotorController.cpp"
+#include "ControlMotorController.h"
 
 int ballrichtung;
 int gelbtor;

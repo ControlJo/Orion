@@ -1,6 +1,4 @@
-#include "Arduino.h"
-#include "FlexCAN_T4.h"
-#include "tinymovr.hpp"
+#include "controlMotor.h"
 
 // ---------------------- FlexCAN_T4 instance ----------------------
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can1;
@@ -31,98 +29,72 @@ bool recv_cb(uint32_t *arbitration_id, uint8_t *data, uint8_t *data_size)
 
 void delay_us_cb(uint32_t us) { delayMicroseconds(us); }
 
-
-class controlMotor{
-
-  //-------------------------- Variables ----------------
-  // every object of the controlMotor class saves the velocity and position setpoint
-  float velocitySetpoint = 0;
-  float positionSetpoint = 0;
-
-  // needet for the calculateMotorSpeed() method
-  int angleToZeroDegrees;
-
-    
-  private:
-  Tinymovr tinymovr;
-
-  public:
-  controlMotor(int nodeID)
-  :tinymovr(nodeID, &send_cb, &recv_cb, &delay_us_cb, 100)
-  {
-
-    switch (nodeID){
-      case 1:
-        angleToZeroDegrees = -30;
-        break;
-      case 2:
-        angleToZeroDegrees = 90;
-        break;
-      case 3:
-        angleToZeroDegrees = 30;
-        break;
-      default:
-        Serial.println("Error in constructor of controlMotor: Incorrect Node ID");
-        angleToZeroDegrees = 0;
-        break;
-    }
+// ---------------------- Constructor ------------------------
+controlMotor::controlMotor(int nodeID)
+: tinymovr(nodeID, &send_cb, &recv_cb, &delay_us_cb, 100)
+{
+  switch (nodeID){
+    case 1: angleToZeroDegrees = -30; break;
+    case 2: angleToZeroDegrees = 90;  break;
+    case 3: angleToZeroDegrees = 30;  break;
+    default:
+      Serial.println("Error in constructor of controlMotor: Incorrect Node ID");
+      angleToZeroDegrees = 0;
+      break;
   }
+}
 
-  boolean inClosedLoop() { return tinymovr.controller.get_state() == 2; }
+// ---------------------- Methods ------------------------
+boolean controlMotor::inClosedLoop() { return tinymovr.controller.get_state() == 2; }
 
-  void calibrate()    { tinymovr.controller.set_state(1); }
-  void setIdle()      { tinymovr.controller.set_state(0); }
-  void closedLoop()   { tinymovr.controller.set_state(2); }
-  void reset()        { tinymovr.reset();                 }
-  void positionMode() { tinymovr.controller.set_mode(2);  }
-  void velocityMode() { tinymovr.controller.set_mode(2);  }
+void controlMotor::calibrate()    { tinymovr.controller.set_state(1); }
+void controlMotor::setIdle()      { tinymovr.controller.set_state(0); }
+void controlMotor::closedLoop()   { tinymovr.controller.set_state(2); }
+void controlMotor::reset()        { tinymovr.reset(); }
+void controlMotor::positionMode() { tinymovr.controller.set_mode(2); }
+void controlMotor::velocityMode() { tinymovr.controller.set_mode(2); }
 
-  // from 0 to 100 % | tinymovr max is 1 000 000 so multiply with 10 000 ( 100 * 10 000 = 1 000 000)
-  void setVelocity(float speed) {
-    tinymovr.controller.velocity.set_setpoint(speed * 10000);
-  }
+void controlMotor::setVelocity(float speed) {
+  tinymovr.controller.velocity.set_setpoint(speed * 10000);
+}
 
-  // method to in-/decrease the velocity based on the previous set value
-  void addVelocity(float relativeSpeed) {
-    velocitySetpoint += relativeSpeed;
-    tinymovr.controller.velocity.set_setpoint(velocitySetpoint);
-  }
-  
-  void setPosition(float position) {
-    tinymovr.controller.position.set_setpoint(position);
-  }
+void controlMotor::addVelocity(float relativeSpeed) {
+  velocitySetpoint += relativeSpeed;
+  tinymovr.controller.velocity.set_setpoint(velocitySetpoint);
+}
 
-  // method to in-/decrease the position based on the set value
-  void addPosition(float relativePosition) {
-    positionSetpoint += relativePosition;
-    tinymovr.controller.position.set_setpoint(positionSetpoint);
-  }
-  
-  // ------------------- getter methods -----------------------------
+void controlMotor::setPosition(float position) {
+  tinymovr.controller.position.set_setpoint(position);
+}
 
-  float getID()               { return tinymovr.comms.can.get_id();                         }
-  float getTemp()             { return tinymovr.get_temp();                                 }
-  float getState()            { return tinymovr.controller.get_state();                     }
-  float getMode()             { return tinymovr.controller.get_mode();                      }
-  float getPositionEstimate() { return tinymovr.sensors.user_frame.get_position_estimate(); }
-  float getVelocityEstimate() { return tinymovr.sensors.user_frame.get_velocity_estimate(); }
-  float getIqEstimate()       { return tinymovr.controller.current.get_Iq_estimate();       }
-  float getIqSetpoint()       { return tinymovr.controller.current.get_Iq_setpoint();       }
-  int   getAngle()            { return angleToZeroDegrees;                                  }
+void controlMotor::addPosition(float relativePosition) {
+  positionSetpoint += relativePosition;
+  tinymovr.controller.position.set_setpoint(positionSetpoint);
+}
 
-  void info() {
-    Serial.print("Device ID: ");            Serial.print(getID());
-    Serial.print(", Temp: ");               Serial.print(getTemp());
-    Serial.print(", State: ");              Serial.print(getState());
-    Serial.print(", Mode: ");               Serial.print(getMode());
-    Serial.print("\n");
+// ---------------------- Getter ------------------------
+float controlMotor::getID()               { return tinymovr.comms.can.get_id(); }
+float controlMotor::getTemp()             { return tinymovr.get_temp(); }
+float controlMotor::getState()            { return tinymovr.controller.get_state(); }
+float controlMotor::getMode()             { return tinymovr.controller.get_mode(); }
+float controlMotor::getPositionEstimate() { return tinymovr.sensors.user_frame.get_position_estimate(); }
+float controlMotor::getVelocityEstimate() { return tinymovr.sensors.user_frame.get_velocity_estimate(); }
+float controlMotor::getIqEstimate()       { return tinymovr.controller.current.get_Iq_estimate(); }
+float controlMotor::getIqSetpoint()       { return tinymovr.controller.current.get_Iq_setpoint(); }
+int   controlMotor::getAngle()            { return angleToZeroDegrees; }
 
-    Serial.print("Position estimate: ");    Serial.print(getPositionEstimate());
-    Serial.print(", Velocity estimate: ");  Serial.print(getVelocityEstimate());
-    Serial.print("\n");
+void controlMotor::info() {
+  Serial.print("Device ID: ");            Serial.print(getID());
+  Serial.print(", Temp: ");               Serial.print(getTemp());
+  Serial.print(", State: ");              Serial.print(getState());
+  Serial.print(", Mode: ");               Serial.print(getMode());
+  Serial.print("\n");
 
-    Serial.print("Iq estimate: ");          Serial.print(getIqEstimate());
-    Serial.print(", Iq setpoint: ");        Serial.print(getIqSetpoint());
-    Serial.print("\n---\n");
-  }
-};
+  Serial.print("Position estimate: ");    Serial.print(getPositionEstimate());
+  Serial.print(", Velocity estimate: ");  Serial.print(getVelocityEstimate());
+  Serial.print("\n");
+
+  Serial.print("Iq estimate: ");          Serial.print(getIqEstimate());
+  Serial.print(", Iq setpoint: ");        Serial.print(getIqSetpoint());
+  Serial.print("\n---\n");
+}

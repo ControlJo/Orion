@@ -1,58 +1,48 @@
-#include "controlMotor.cpp"
+#include "ControlMotorController.h"
 
-
-class motorController{
-    // initialization list
-    // -> makes clear the following objects have to be initialized before calling the constructor
-    private:
-    controlMotor motorLeft;
-    controlMotor motorBack;
-    controlMotor motorRight;
-
-    public:
-    motorController()   // constructor
-       :motorLeft(1),
-        motorBack(2),
-        motorRight(3)
+motorController::motorController()   // constructor
+   :motorLeft(1),
+    motorBack(2),
+    motorRight(3)
     {}
 
-    void calibrate() {
+    void motorController::calibrate() {
         motorLeft.calibrate();
         motorBack.calibrate();
         motorRight.calibrate();
     }
 
-    void closedLoop() {
+    void motorController::closedLoop() {
         motorLeft.closedLoop();
         motorBack.closedLoop();
         motorRight.closedLoop();
     }
 
-    void positionMode() {
+    void motorController::positionMode() {
         motorLeft.positionMode();
         motorBack.positionMode();
         motorRight.positionMode();
     }
 
-    void velocityMode() {
+    void motorController::velocityMode() {
         motorLeft.velocityMode();
         motorBack.velocityMode();
         motorRight.velocityMode();
     }
 
-    void idle() {
+    void motorController::idle() {
         motorLeft.setIdle();
         motorBack.setIdle();
         motorRight.setIdle();
     }
 
-    void reset() {
+    void motorController::reset() {
         motorLeft.reset();
         motorBack.reset();
         motorRight.reset();
     }
 
-    float calculateMotorSpeed(controlMotor motor, float driveAngle, int targetVelocity)
+    float motorController::calculateMotorSpeed(controlMotor motor, float driveAngle, int targetVelocity)
     {
         // get the angle from the weel to driveAngle and put into radians
         double radians = (driveAngle - motor.getAngle()) * 3.14159 / 180;
@@ -63,39 +53,39 @@ class motorController{
     }
 
     // calculates and sets the speed for all motors to drive with given speed into given direction
-    void drive(float angle, float speed) {
+    void motorController::drive(float angle, int speed) {
         motorLeft.setVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.setVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.setVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
-    void addToCurrentVelocityVector(float angle, float speed) {
+    void motorController::addToCurrentVelocityVector(float angle, float speed) {
         motorLeft.addVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.addVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.addVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
     // adds a speed to all motors to achieve a turning motion
-    void addTurnSpeed(float turnspeed) {
+    void motorController::addTurnSpeed(float turnspeed) {
         motorLeft.addVelocity(turnspeed);
         motorBack.addVelocity(turnspeed);
         motorRight.addVelocity(turnspeed);
     }
 
-    void addPosiition(float relativePosition) {
+    void motorController::addPosition(float relativePosition) {
         motorLeft.addPosition(relativePosition);
         motorBack.addPosition(relativePosition);
         motorRight.addPosition(relativePosition);
     }
 
-    void setVelocity(float speed) {
+    void motorController::setVelocity(float speed) {
         motorLeft.setVelocity(speed);
         motorBack.setVelocity(speed);
         motorRight.setVelocity(speed);
     }
 
     // prints the info of all Motors into the console
-    void infoAll() {
+    void motorController::infoAll() {
         motorLeft.info();
         Serial.println("");
         motorBack.info();
@@ -103,7 +93,7 @@ class motorController{
         motorRight.info();
     }
 
-    void takeBall(float ballDirection, float opponentGoalDirection)
+    void motorController::takeBall(float ballDirection, float opponentGoalDirection)
     {
         float driveAngle = 0;
 
@@ -125,8 +115,6 @@ class motorController{
     }
 
     // returns the object of one motor to make indivitual actions possible
-    controlMotor getLeftMotor()     {   return motorLeft;   }
-    controlMotor getBackMotor()     {   return motorBack;   }
-    controlMotor getRightMotor()    {   return motorRight;   }
-
-};
+    controlMotor motorController::getLeftMotor()     {   return motorLeft;   }
+    controlMotor motorController::getBackMotor()     {   return motorBack;   }
+    controlMotor motorController::getRightMotor()    {   return motorRight;  }
