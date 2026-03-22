@@ -1,10 +1,13 @@
 #include <Arduino.h>
+#include "controlMotor.cpp"
+#include "ControlMotorController.cpp"
 
 int ballrichtung;
 int gelbtor;
 int blautor;
 
-// put function declarations here:
+motorController controller;
+
 void doPiCommunication()
 {
   String receivedData;
@@ -28,4 +31,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   doPiCommunication();
   //Serial.println("test");
+
+  controller.drive(ballrichtung, 10);
+
 }
