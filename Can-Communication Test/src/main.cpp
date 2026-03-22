@@ -1,7 +1,4 @@
-#include "Arduino.h"
-#include "FlexCAN_T4.h"
-#include "tinymovr.hpp"
-#include "controlMotorController.cpp"
+#include "ControlMotorController.h"
 
 // ---------------------- Motor controller object --------------------------
 
@@ -72,11 +69,11 @@ void loop()
     }
     else if (receivedChar == '<') {
       Serial.println("Received L turn command");
-      controller.addPosiition(200);
+      controller.addPosition(200);
     }
     else if (receivedChar == '>') {
       Serial.println("Received R turn command");
-      controller.addPosiition(-200);
+      controller.addPosition(-200);
     }
     else if (receivedChar == 'I') {
       controller.infoAll();
@@ -113,11 +110,11 @@ void loop()
     }
     else if( receivedChar == 'q') {
       Serial.print("Received left turn command");
-      controller.addPosiition(200);
+      controller.addPosition(200);
     }
     else if( receivedChar == 'e') {
       Serial.print("Received right turn command");
-      controller.addPosiition(-200);
+      controller.addPosition(-200);
     }
   }
   delay(50);
