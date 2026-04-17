@@ -125,5 +125,5 @@ motorController::motorController()   // constructor
     controlMotor motorController::getLeftMotor()     {   return motorLeft;   }
     controlMotor motorController::getBackMotor()     {   return motorBack;   }
     controlMotor motorController::getRightMotor()    {   return motorRight;  }
-    float getCurrentAngle() { return currentAngle; }
+    float getCurrentAngle() { return currentAngle; }// getter
     float getCurrentSpeed() { return currentSpeed; }
