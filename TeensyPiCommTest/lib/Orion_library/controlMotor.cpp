@@ -50,9 +50,9 @@ boolean controlMotor::inClosedLoop() { return tinymovr.controller.get_state() ==
 void controlMotor::calibrate()    { tinymovr.controller.set_state(1); }
 void controlMotor::setIdle()      { tinymovr.controller.set_state(0); }
 void controlMotor::closedLoop()   { tinymovr.controller.set_state(2); }
-void controlMotor::reset()        { tinymovr.reset(); }
-void controlMotor::positionMode() { tinymovr.controller.set_mode(2); }
-void controlMotor::velocityMode() { tinymovr.controller.set_mode(2); }
+void controlMotor::reset()        { tinymovr.reset();                 }
+void controlMotor::positionMode() { tinymovr.controller.set_mode(2);  }
+void controlMotor::velocityMode() { tinymovr.controller.set_mode(2);  }
 
 void controlMotor::setVelocity(float speed) {
   tinymovr.controller.velocity.set_setpoint(speed * 10000);
@@ -78,7 +78,9 @@ float controlMotor::getTemp()             { return tinymovr.get_temp(); }
 float controlMotor::getState()            { return tinymovr.controller.get_state(); }
 float controlMotor::getMode()             { return tinymovr.controller.get_mode(); }
 float controlMotor::getPositionEstimate() { return tinymovr.sensors.user_frame.get_position_estimate(); }
+float controlMotor::getPositionSetpoint() { return positionSetpoint;  }
 float controlMotor::getVelocityEstimate() { return tinymovr.sensors.user_frame.get_velocity_estimate(); }
+float controlMotor::getVelocitySetpoint() { return velocitySetpoint;  }
 float controlMotor::getIqEstimate()       { return tinymovr.controller.current.get_Iq_estimate(); }
 float controlMotor::getIqSetpoint()       { return tinymovr.controller.current.get_Iq_setpoint(); }
 int   controlMotor::getAngle()            { return angleToZeroDegrees; }

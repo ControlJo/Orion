@@ -6,6 +6,9 @@ motorController::motorController()   // constructor
     motorRight(3)
     {}
 
+    float currentAngle = 0;
+    float currentSpeed = 0;
+
     void motorController::calibrate() {
         motorLeft.calibrate();
         motorBack.calibrate();
@@ -54,12 +57,16 @@ motorController::motorController()   // constructor
 
     // calculates and sets the speed for all motors to drive with given speed into given direction
     void motorController::drive(float angle, int speed) {
+        float currentAngle = angle;
+        float currentSpeed = speed;
         motorLeft.setVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.setVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.setVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
     void motorController::addToCurrentVelocityVector(float angle, float speed) {
+        float currentAngle = angle;
+        float currentSpeed = speed;
         motorLeft.addVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.addVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.addVelocity(calculateMotorSpeed(motorRight, angle, speed));
@@ -78,7 +85,7 @@ motorController::motorController()   // constructor
         motorRight.addPosition(relativePosition);
     }
 
-    void motorController::setVelocity(float speed) {
+    void motorController::setTurnSpeed(float speed) {
         motorLeft.setVelocity(speed);
         motorBack.setVelocity(speed);
         motorRight.setVelocity(speed);
@@ -114,7 +121,9 @@ motorController::motorController()   // constructor
         drive(driveAngle, 100);
     }
 
-    // returns the object of one motor to make indivitual actions possible
+    // getter methods
     controlMotor motorController::getLeftMotor()     {   return motorLeft;   }
     controlMotor motorController::getBackMotor()     {   return motorBack;   }
     controlMotor motorController::getRightMotor()    {   return motorRight;  }
+    float getCurrentAngle() { return currentAngle; }
+    float getCurrentSpeed() { return currentSpeed; }

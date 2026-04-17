@@ -41,7 +41,9 @@ public:
     float getState();
     float getMode();
     float getPositionEstimate();
+    float getPositionSetpoint();
     float getVelocityEstimate();
+    float getVelocitySetpoint();
     float getIqEstimate();
     float getIqSetpoint();
     int   getAngle();

@@ -10,6 +10,9 @@ class motorController{
     controlMotor motorBack;
     controlMotor motorRight;
 
+    float currentAngle;
+    float currentSpeed;
+
     public:
     motorController();
     void calibrate();
@@ -26,7 +29,7 @@ class motorController{
     void addToCurrentVelocityVector(float angle, float speed);
     void addTurnSpeed(float turnspeed);
     void addPosition(float relativePosition);
-    void setVelocity(float speed);
+    void setTurnSpeed(float speed);
 
     void infoAll();
     void takeBall(float ballDirection, float opponentGoalDirection);
