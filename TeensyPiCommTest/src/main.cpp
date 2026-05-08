@@ -6,6 +6,7 @@ int blautor;
 
 motorController controller;
 
+// Liest die Daten vom Pi und speichert sie in ballrichtung, gelbtor und blautor
 void doPiCommunication()
 {
   String receivedData;
@@ -30,6 +31,9 @@ void loop() {
   doPiCommunication();
   //Serial.println("test");
 
-  controller.drive(ballrichtung, 10);
+  Serial.println("Ballrichtung: " + String(ballrichtung));
+  Serial.println("Gelbtor: " + String(gelbtor));
+  Serial.println("Blautor: " + String(blautor));
 
+  controller.drive(ballrichtung, 10);
 }
