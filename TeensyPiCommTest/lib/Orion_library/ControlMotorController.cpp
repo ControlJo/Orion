@@ -72,14 +72,7 @@ motorController::motorController()   // constructor
         motorRight.addVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
-    // adds a speed to all motors to achieve a turning motion
-    void motorController::addTurnSpeed(float turnspeed) {
-        motorLeft.addVelocity(turnspeed);
-        motorBack.addVelocity(turnspeed);
-        motorRight.addVelocity(turnspeed);
-    }
-
-    void motorController::addPosition(float relativePosition) {
+    void motorController::addTurnSpeed(float relativePosition) {
         motorLeft.addPosition(relativePosition);
         motorBack.addPosition(relativePosition);
         motorRight.addPosition(relativePosition);

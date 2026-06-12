@@ -55,21 +55,27 @@ void controlMotor::positionMode() { tinymovr.controller.set_mode(2);  }
 void controlMotor::velocityMode() { tinymovr.controller.set_mode(2);  }
 
 void controlMotor::setVelocity(float speed) {
+  velocitySetpoint = speed;
+  if(velocitySetpoint > 100) velocitySetpoint = 100;
+  if(velocitySetpoint < -100) velocitySetpoint = -100;
   tinymovr.controller.velocity.set_setpoint(speed * 10000);
 }
 
 void controlMotor::addVelocity(float relativeSpeed) {
   velocitySetpoint += relativeSpeed;
-  tinymovr.controller.velocity.set_setpoint(velocitySetpoint);
+  if(velocitySetpoint > 100) velocitySetpoint = 100;
+  if(velocitySetpoint < -100) velocitySetpoint = -100;
+  setVelocity(velocitySetpoint);
 }
 
 void controlMotor::setPosition(float position) {
+  positionSetpoint = position;
   tinymovr.controller.position.set_setpoint(position);
 }
 
 void controlMotor::addPosition(float relativePosition) {
   positionSetpoint += relativePosition;
-  tinymovr.controller.position.set_setpoint(positionSetpoint);
+  setPosition(positionSetpoint);
 }
 
 // ---------------------- Getter ------------------------
