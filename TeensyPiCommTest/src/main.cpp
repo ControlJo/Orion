@@ -1,8 +1,8 @@
 #include "ControlMotorController.h"
 
-int ballrichtung;
-int gelbtor;
-int blautor;
+int ballrichtung = 0;
+int gelbtor = 0;
+int blautor = 0;
 
 motorController controller;
 
@@ -22,18 +22,17 @@ void doPiCommunication()
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  Serial1.begin(9600);
-  Serial2.begin(9600);
+  //Serial1.begin(9600);
+  //Serial2.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   doPiCommunication();
-  //Serial.println("test");
 
-  Serial.println("Ballrichtung: " + String(ballrichtung));
-  Serial.println("Gelbtor: " + String(gelbtor));
-  Serial.println("Blautor: " + String(blautor));
-
+  Serial.println("[INFO]: Ballrichtung: " + String(ballrichtung));
+  Serial.println("[INFO]: Gelbtor: " + String(gelbtor));
+  Serial.println("[INFO]: Blautor: " + String(blautor));
+  
   controller.drive(ballrichtung, 10);
-}
+} 

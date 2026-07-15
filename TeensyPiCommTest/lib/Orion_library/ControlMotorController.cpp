@@ -4,7 +4,13 @@ motorController::motorController()   // constructor
    :motorLeft(1),
     motorBack(2),
     motorRight(3)
-    {}
+    {
+        Serial.println("Starting CAN for motorLeft");
+        motorLeft.startCan();
+        delay(1000);
+        Serial.println("Started Can");
+    }
+
 
     float currentAngle = 0;
     float currentSpeed = 0;
@@ -57,16 +63,17 @@ motorController::motorController()   // constructor
 
     // calculates and sets the speed for all motors to drive with given speed into given direction
     void motorController::drive(float angle, int speed) {
-        float currentAngle = angle;
-        float currentSpeed = speed;
+        currentAngle = angle;
+        currentSpeed = speed;
+        currentAngle = angle;
         motorLeft.setVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.setVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.setVelocity(calculateMotorSpeed(motorRight, angle, speed));
     }
 
     void motorController::addToCurrentVelocityVector(float angle, float speed) {
-        float currentAngle = angle;
-        float currentSpeed = speed;
+        currentAngle = angle;
+        currentSpeed = speed;
         motorLeft.addVelocity(calculateMotorSpeed(motorLeft, angle, speed));
         motorBack.addVelocity(calculateMotorSpeed(motorBack, angle, speed));
         motorRight.addVelocity(calculateMotorSpeed(motorRight, angle, speed));

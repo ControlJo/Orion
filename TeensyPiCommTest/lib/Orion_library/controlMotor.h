@@ -26,6 +26,8 @@ public:
      */
     controlMotor(int nodeID);
 
+    void startCan();
+
     boolean inClosedLoop();
 
     /**

@@ -45,6 +45,14 @@ controlMotor::controlMotor(int nodeID)
 }
 
 // ---------------------- Methods ------------------------
+
+void controlMotor::startCan() {
+  Can1.begin();
+  Can1.setBaudRate(1000000);
+  Can1.enableFIFO();
+  Can1.enableFIFOInterrupt();
+}
+
 boolean controlMotor::inClosedLoop() { return tinymovr.controller.get_state() == 2; }
 
 void controlMotor::calibrate()    { tinymovr.controller.set_state(1); }
@@ -58,13 +66,11 @@ void controlMotor::setVelocity(float speed) {
   velocitySetpoint = speed;
   if(velocitySetpoint > 100) velocitySetpoint = 100;
   if(velocitySetpoint < -100) velocitySetpoint = -100;
-  tinymovr.controller.velocity.set_setpoint(speed * 10000);
+  tinymovr.controller.velocity.set_setpoint(velocitySetpoint * 10000);
 }
 
 void controlMotor::addVelocity(float relativeSpeed) {
   velocitySetpoint += relativeSpeed;
-  if(velocitySetpoint > 100) velocitySetpoint = 100;
-  if(velocitySetpoint < -100) velocitySetpoint = -100;
   setVelocity(velocitySetpoint);
 }
 
